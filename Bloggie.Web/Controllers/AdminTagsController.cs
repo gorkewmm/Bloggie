@@ -1,16 +1,17 @@
-﻿using Bloggie.Web.Data;
-using Bloggie.Web.Models.Domain;
+﻿using Bloggie.Web.Models.Domain;
 using Bloggie.Web.Models.ViewModels;
+using Bloggie.Web.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bloggie.Web.Controllers
 {
     public class AdminTagsController : Controller
     {
-        private readonly BloggieDbContext _context;
-        public AdminTagsController(BloggieDbContext context)
+        private readonly ITagRepository _tagInterface;
+        public AdminTagsController(ITagRepository tagInterface)
         {
-            _context = context;
+            _tagInterface = tagInterface;
         }
         public IActionResult Add()
         {
@@ -18,7 +19,7 @@ namespace Bloggie.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(AddTagRequest addTagRequest)
+        public async Task<IActionResult> Add(AddTagRequest addTagRequest)
         {
             var tag = new Tag()
             {
@@ -26,65 +27,71 @@ namespace Bloggie.Web.Controllers
                 DisplayName = addTagRequest.DisplayName
             };
 
-            _context.Tags.Add(tag);
-            _context.SaveChanges();
+            await _tagInterface.AddAsync(tag);
 
             return RedirectToAction("List");
         }
 
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
-            var tags = _context.Tags.ToList();
+            var tags = await _tagInterface.GetAllAsync();
 
             return View(tags);
         }
 
-        public IActionResult Edit(Guid id)
+        public async Task<IActionResult> Edit(Guid id)
         {
-            var editTagRequest = new EditTagRequest();
-            var tag = _context.Tags.Find(id);
-            if (tag == null)
+            var existingTag = await _tagInterface.GetAsync(id);
+
+            if (existingTag == null)
             {
-                return RedirectToAction("List");
+                return View(null);
             }
 
-            editTagRequest.Id = tag.Id;
-            editTagRequest.Name = tag.Name;
-            editTagRequest.DisplayName = tag.DisplayName;
+            var editTagRequest = new EditTagRequest();
+
+            editTagRequest.Id = existingTag.Id;
+            editTagRequest.Name = existingTag.Name;
+            editTagRequest.DisplayName = existingTag.DisplayName;
 
             return View(editTagRequest);
         }
 
         [HttpPost]
-        public IActionResult Edit(EditTagRequest editTagRequest)
+        public async Task<IActionResult> Edit(EditTagRequest editTagRequest)
         {
-            var tag = _context.Tags.Find(editTagRequest.Id);
-            if(tag == null)
+            var tag = new Tag()
             {
-                return RedirectToAction("Edit", new {editTagRequest.Id});
+                Id = editTagRequest.Id,
+                Name = editTagRequest.Name,
+                DisplayName = editTagRequest.DisplayName
+            };
+            var updatedTag =  await _tagInterface.UpdateAsync(tag);
+
+            if (updatedTag != null)
+            {
+                //Show success notifiation
+            }
+            else
+            {
+                //Show error notification
             }
 
-            tag.Name = editTagRequest.Name;
-            tag.DisplayName = editTagRequest.DisplayName;
-
-            _context.SaveChanges();
-            return RedirectToAction("List");
+            return RedirectToAction("Edit", new { id = editTagRequest.Id });
         }
 
         [HttpPost]
-        public IActionResult Delete(EditTagRequest editTagRequest)
+        public async Task<IActionResult> Delete(EditTagRequest editTagRequest)
         {
-            var tag = _context.Tags.Find(editTagRequest.Id);
+            var deletedTag = await _tagInterface.DeleteAsync(editTagRequest.Id);
 
-            if (tag != null)
+            if (deletedTag != null)
             {
-                _context.Tags.Remove(tag);
-                _context.SaveChanges();
-
+                //Show success notifiation
                 return RedirectToAction("List");
             }
 
-            return RedirectToAction("Edit", new {id = editTagRequest.Id});
+            return RedirectToAction("Edit", new { id = editTagRequest.Id });
 
         }
     }
