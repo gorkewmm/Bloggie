@@ -8,10 +8,10 @@ namespace Bloggie.Web.Controllers
 {
     public class AdminTagsController : Controller
     {
-        private readonly ITagRepository _tagInterface;
-        public AdminTagsController(ITagRepository tagInterface)
+        private readonly ITagRepository _tagRepository;
+        public AdminTagsController(ITagRepository tagRepository)
         {
-            _tagInterface = tagInterface;
+            _tagRepository = tagRepository;
         }
         public IActionResult Add()
         {
@@ -27,21 +27,21 @@ namespace Bloggie.Web.Controllers
                 DisplayName = addTagRequest.DisplayName
             };
 
-            await _tagInterface.AddAsync(tag);
+            await _tagRepository.AddAsync(tag);
 
             return RedirectToAction("List");
         }
 
         public async Task<IActionResult> List()
         {
-            var tags = await _tagInterface.GetAllAsync();
+            var tags = await _tagRepository.GetAllAsync();
 
             return View(tags);
         }
 
         public async Task<IActionResult> Edit(Guid id)
         {
-            var existingTag = await _tagInterface.GetAsync(id);
+            var existingTag = await _tagRepository.GetAsync(id);
 
             if (existingTag == null)
             {
@@ -66,7 +66,7 @@ namespace Bloggie.Web.Controllers
                 Name = editTagRequest.Name,
                 DisplayName = editTagRequest.DisplayName
             };
-            var updatedTag =  await _tagInterface.UpdateAsync(tag);
+            var updatedTag =  await _tagRepository.UpdateAsync(tag);
 
             if (updatedTag != null)
             {
@@ -83,7 +83,7 @@ namespace Bloggie.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(EditTagRequest editTagRequest)
         {
-            var deletedTag = await _tagInterface.DeleteAsync(editTagRequest.Id);
+            var deletedTag = await _tagRepository.DeleteAsync(editTagRequest.Id);
 
             if (deletedTag != null)
             {
