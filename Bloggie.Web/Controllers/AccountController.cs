@@ -79,6 +79,11 @@ namespace Bloggie.Web.Controllers
     
             return RedirectToAction("Index","Home");
         }
+
+        [HttpGet]
         public async Task<IActionResult> AccessDenied()
+        {
+            return View();
+        }
     }
 }
