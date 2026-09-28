@@ -51,8 +51,13 @@ namespace Bloggie.Web.Controllers
 
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string ReturnUrl)
         {
+            var model = new LoginViewModel
+            {
+                ReturnUrl = ReturnUrl
+            };
+
             return View();
         }
 
@@ -63,6 +68,10 @@ namespace Bloggie.Web.Controllers
 
             if (signInResult != null && signInResult.Succeeded)
             {
+                if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
+                {
+                    return Redirect(loginViewModel.ReturnUrl);
+                }
                 return RedirectToAction("Index", "Home");
             }
 
