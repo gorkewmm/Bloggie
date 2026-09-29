@@ -67,6 +67,11 @@ namespace Bloggie.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
             var signInResult = await _signInManager.PasswordSignInAsync(loginViewModel.UserName, loginViewModel.Password, false, false);
 
             if (signInResult != null && signInResult.Succeeded)
@@ -81,15 +86,14 @@ namespace Bloggie.Web.Controllers
             //Show the errors
             return View();
 
-
         }
 
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-    
-            return RedirectToAction("Index","Home");
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
