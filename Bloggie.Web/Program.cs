@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AuthDbContext>(optionsBuilder =>
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AuthDbContext>();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     //Default settings
@@ -29,7 +30,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
-
 });
 
 builder.Services.AddScoped<ITagRepository, TagRepository>();
