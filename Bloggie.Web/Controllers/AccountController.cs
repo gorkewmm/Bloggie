@@ -61,7 +61,7 @@ namespace Bloggie.Web.Controllers
                 ReturnUrl = ReturnUrl
             };
 
-            return View();
+            return View(model);
         }
 
         [HttpPost]

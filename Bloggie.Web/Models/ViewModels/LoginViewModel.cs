@@ -11,6 +11,6 @@ namespace Bloggie.Web.Models.ViewModels
         [MinLength(6, ErrorMessage = "Password has to be at least 6 characters")]
         public string Password { get; set; }
 
-        public string ReturnUrl { get; set; }
+        public string? ReturnUrl { get; set; }
     }
 }
