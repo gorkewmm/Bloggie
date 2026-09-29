@@ -21,10 +21,12 @@ namespace Bloggie.Web.Controllers
             return View();
         }
 
-        
+
         [HttpPost]
         public async Task<IActionResult> Add(AddTagRequest addTagRequest)
         {
+            ValidateAddTagRequest(addTagRequest);
+
             if (!ModelState.IsValid)
             {
                 return View();
@@ -38,6 +40,16 @@ namespace Bloggie.Web.Controllers
             await _tagRepository.AddAsync(tag);
 
             return RedirectToAction("List");
+        }
+        private void ValidateAddTagRequest(AddTagRequest addTagRequest)
+        {
+            if (addTagRequest.Name != null & addTagRequest.DisplayName != null)
+            {
+                if (addTagRequest.Name == addTagRequest.DisplayName)
+                {
+                    ModelState.AddModelError("DisplayName", "Name can not be the same as DisplayName");
+                }
+            }
         }
 
         public async Task<IActionResult> List()
@@ -74,7 +86,7 @@ namespace Bloggie.Web.Controllers
                 Name = editTagRequest.Name,
                 DisplayName = editTagRequest.DisplayName
             };
-            var updatedTag =  await _tagRepository.UpdateAsync(tag);
+            var updatedTag = await _tagRepository.UpdateAsync(tag);
 
             if (updatedTag != null)
             {
