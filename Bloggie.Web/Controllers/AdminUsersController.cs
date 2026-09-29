@@ -1,6 +1,7 @@
 ﻿using Bloggie.Web.Models.ViewModels;
 using Bloggie.Web.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bloggie.Web.Controllers
@@ -9,9 +10,11 @@ namespace Bloggie.Web.Controllers
     public class AdminUsersController : Controller
     {
         private readonly IUserRepository _userRepository;
-        public AdminUsersController(IUserRepository userRepository)
+        private readonly UserManager<IdentityUser> _userManager;
+        public AdminUsersController(IUserRepository userRepository, UserManager<IdentityUser> userManager)
         {
             _userRepository = userRepository;
+            _userManager = userManager;
         }
         public async Task<IActionResult> List()
         {
@@ -31,6 +34,39 @@ namespace Bloggie.Web.Controllers
             }
 
             return View(usersViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> List(UserViewModel userViewModel)
+        {
+            var identityUser = new IdentityUser()
+            {
+                Email = userViewModel.Email,
+                UserName = userViewModel.Username,
+            };
+
+            var result = await _userManager.CreateAsync(identityUser, userViewModel.Password);
+
+            if(result != null)
+            {
+                if (result.Succeeded)
+                {
+                    var roles = new List<string>() { "User" };
+
+                    if (userViewModel.AdminRoleCheckbox)
+                    {
+                        roles.Add("Admin");
+                    }
+                    var roleResult = await _userManager.AddToRolesAsync(identityUser, roles);
+
+                    if (roleResult != null && roleResult.Succeeded)
+                    {
+                        return RedirectToAction("List", "AdminUsers");
+                    }
+                }
+            }           
+            return View();
+
         }
     }
 }

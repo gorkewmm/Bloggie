@@ -25,5 +25,13 @@ namespace Bloggie.Web.Repositories
             }
             return users;
         }
+
+        //public async Task<IdentityUser> AddUser(IdentityUser identityUser)
+        //{
+        //    var addedUser = await _authDbContext.Users.AddAsync(identityUser);
+        //    await _authDbContext.SaveChangesAsync();
+
+        //    return identityUser;
+        //}
     }
 }
