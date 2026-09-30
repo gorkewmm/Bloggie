@@ -36,18 +36,34 @@ namespace Bloggie.Web.Repositories
             return null;
         }
 
-        public async Task<IEnumerable<Tag>> GetAllAsync()
-        {
-            var tags = await _bloggieDbContext.Tags.ToListAsync();
+        //public async Task<IEnumerable<Tag>> GetAllAsync()
+        //{
+        //    var tags = await _bloggieDbContext.Tags.ToListAsync();
 
-            return tags;
+        //    return tags;
+        //}
+
+        public async Task<IEnumerable<Tag>> GetAllAsync(string? searchQuery = null)
+        {
+            var query = _bloggieDbContext.Tags.AsQueryable();
+            //Filtering
+            if (string.IsNullOrWhiteSpace(searchQuery)==false)
+            {
+                query = query.Where(x => x.Name.Contains(searchQuery) || x.DisplayName.Contains(searchQuery));
+            }
+
+            //Sorting
+
+            //Pagination
+
+            return await query.ToListAsync();
         }
 
         public async Task<Tag?> GetAsync(Guid id)
         {
             var tag = await _bloggieDbContext.Tags.FirstOrDefaultAsync(x => x.Id == id);
             return tag;
-            
+
         }
 
         public async Task<Tag?> UpdateAsync(Tag tag)

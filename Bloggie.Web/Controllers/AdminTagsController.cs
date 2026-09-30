@@ -43,7 +43,7 @@ namespace Bloggie.Web.Controllers
         }
         private void ValidateAddTagRequest(AddTagRequest addTagRequest)
         {
-            if (addTagRequest.Name != null & addTagRequest.DisplayName != null)
+            if (addTagRequest.Name != null && addTagRequest.DisplayName != null)
             {
                 if (addTagRequest.Name == addTagRequest.DisplayName)
                 {
@@ -52,9 +52,11 @@ namespace Bloggie.Web.Controllers
             }
         }
 
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(string? searchQuery)
         {
-            var tags = await _tagRepository.GetAllAsync();
+            ViewBag.SearchQuery = searchQuery;
+
+            var tags = await _tagRepository.GetAllAsync(searchQuery);
 
             return View(tags);
         }
