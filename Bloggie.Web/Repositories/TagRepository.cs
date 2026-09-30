@@ -36,17 +36,12 @@ namespace Bloggie.Web.Repositories
             return null;
         }
 
-        //public async Task<IEnumerable<Tag>> GetAllAsync()
-        //{
-        //    var tags = await _bloggieDbContext.Tags.ToListAsync();
-
-        //    return tags;
-        //}
-
         public async Task<IEnumerable<Tag>> GetAllAsync(
-            string? searchQuery = null, 
-            string? sortBy = null, 
-            string? sortDirection = null)
+            string? searchQuery = null,
+            string? sortBy = null,
+            string? sortDirection = null,
+            int pageNumber = 1,
+            int pageSize = 100)
         {
             var query = _bloggieDbContext.Tags.AsQueryable();
             //Filtering
@@ -60,7 +55,7 @@ namespace Bloggie.Web.Repositories
             {
                 var isDesc = string.Equals(sortDirection, "Desc", StringComparison.OrdinalIgnoreCase);
 
-                if (string.Equals(sortBy, "Name",StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(sortBy, "Name", StringComparison.OrdinalIgnoreCase))
                 {
                     query = isDesc ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name);
                 }
@@ -73,6 +68,8 @@ namespace Bloggie.Web.Repositories
 
 
             //Pagination
+            var skipResult = (pageNumber - 1) * pageSize;
+            query = query.Skip(skipResult).Take(pageSize);
 
             return await query.ToListAsync();
         }
@@ -98,6 +95,11 @@ namespace Bloggie.Web.Repositories
             }
 
             return null;
+        }
+
+        public async Task<int> CountAsync()
+        {
+            return await _bloggieDbContext.Tags.CountAsync();
         }
     }
 }
