@@ -9,5 +9,7 @@ namespace Bloggie.Web.Repositories
         Task<IEnumerable<BlogPostLike>> GetLikesForBlog(Guid blogPostId);
 
         Task<BlogPostLike> AddLikeForBlog(BlogPostLike blogPostLike);
+
+        Task<bool> RemoveLikeForBlog(Guid blogPostId, Guid userId);
     }
 }

@@ -31,5 +31,20 @@ namespace Bloggie.Web.Repositories
             return await _bloggieDbContext.BlogPostLikes
                 .CountAsync(x => x.BlogPostId == blogPostId);
         }
+
+        public async Task<bool> RemoveLikeForBlog(Guid blogPostId, Guid userId)
+        {
+            var like = await _bloggieDbContext.BlogPostLikes
+                .FirstOrDefaultAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
+
+            if (like == null)
+            {
+                return false;
+            }
+
+            _bloggieDbContext.BlogPostLikes.Remove(like);
+            await _bloggieDbContext.SaveChangesAsync();
+            return true;
+        }
     }
 }

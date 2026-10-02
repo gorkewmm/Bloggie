@@ -24,21 +24,11 @@
                 <div class="mb-3">
                     @if (signInManager.IsSignedIn(User))
                     {
-                        if (Model.Liked)
-                        {
-                            <a style="cursor: pointer;">
-                                <i class="bi bi-hand-thumbs-up-fill"></i>
-                            </a>
-                        }
-                        else
-                        {
-                            <a id="btnLike" style="cursor: pointer;">
-                                <i class="bi bi-hand-thumbs-up"></i>
-                            </a>
-                        }
+                        <a id="btnLike" style="cursor: pointer;">
+                            <i id="likeIcon" class="bi @(Model.Liked ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i>
+                        </a>
                     }
                     <span id="totalLikes">@Model.TotalLikes likes</span>
-
                 </div>
 
                 <div class="mb-3 d-flex">
@@ -107,39 +97,42 @@
 @section Scripts {
     <script>
         const btnLikeElement = document.getElementById('btnLike');
+        const likeIconElement = document.getElementById('likeIcon');
         const totalLikeElement = document.getElementById('totalLikes');
 
+        let liked = @(Model.Liked ? "true" : "false");
+
         async function getTotalLikes() {
-            fetch('/api/blogpostlike/@Model.Id/totalLikes', {
+            const response = await fetch('/api/blogpostlike/@Model.Id/totalLikes', {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': '*/*'
-                }
-            })
-                .then(data => data.json())
-                .then(result => totalLikeElement.innerHTML = result);
+                headers: { 'Content-Type': 'application/json', 'Accept': '*/*' }
+            });
+            totalLikeElement.innerHTML = (await response.json()) + ' likes';
         }
 
-        async function addLikeForBlog() {
-            fetch('/api/BlogPostLike/Add', {
-                method: 'Post',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': '*/*'
-                },
+        async function toggleLike() {
+            const url = liked ? '/api/BlogPostLike/Remove' : '/api/BlogPostLike/Add';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': '*/*' },
                 body: JSON.stringify({
                     blogPostId: '@Model.Id',
                     userId: '@userManager.GetUserId(User)'
                 })
-            }).then(() => {
-                btnLikeElement.innerHTML = '<i class="bi bi-hand-thumbs-up-fill"></i>';
-                btnLikeElement.removeEventListener('click', addLikeForBlog);
-                getTotalLikes();
             });
+
+            if (response.ok) {
+                liked = !liked;
+                likeIconElement.className = liked
+                    ? 'bi bi-hand-thumbs-up-fill'
+                    : 'bi bi-hand-thumbs-up';
+                getTotalLikes();
+            }
         }
 
-        btnLikeElement.addEventListener('click', addLikeForBlog);
-
+        if (btnLikeElement) {
+            btnLikeElement.addEventListener('click', toggleLike);
+        }
     </script>
 }
